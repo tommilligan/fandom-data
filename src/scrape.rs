@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct Work {
     pub id: String,
     pub title: String,
-    pub author: String,
+    pub author: Option<String>,
     pub relationships: Vec<String>,
     pub characters: Vec<String>,
     pub freeforms: Vec<String>,
@@ -88,7 +88,7 @@ pub fn search_page_to_works(body: &str) -> Result<Vec<Work>> {
 
             let mut title_author = work_element.select(&*SELECTOR_TITLE_AUTHOR);
             let title = title_author.next_text().context("title")?.to_owned();
-            let author = title_author.next_text().context("author")?.to_owned();
+            let author = title_author.next_text().ok().map(ToOwned::to_owned);
 
             let relationships = work_element
                 .select(&*SELECTOR_RELATIONSHIP)
