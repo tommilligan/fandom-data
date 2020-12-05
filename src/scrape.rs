@@ -113,20 +113,20 @@ pub fn search_page_to_works(body: &str) -> Result<Vec<Work>> {
             let language = work_element
                 .select(&*SELECTOR_LANGUAGE)
                 .next_text()
-                .context("language")?
+                .unwrap_or("")
                 .to_owned();
             let words = work_element
                 .select(&*SELECTOR_WORDS)
                 .next_number()
-                .context("words")?;
+                .unwrap_or(0);
             let kudos = work_element
                 .select(&*SELECTOR_KUDOS)
                 .next_number()
-                .context("kudos")?;
+                .unwrap_or(0);
             let hits = work_element
                 .select(&*SELECTOR_HITS)
                 .next_number()
-                .context("hits")?;
+                .unwrap_or(0);
 
             Ok(Work {
                 id,
