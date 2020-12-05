@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use chrono::NaiveDate;
 use once_cell::sync::Lazy;
 use scraper::{Html, Selector};
@@ -7,25 +8,15 @@ use serde::{Deserialize, Serialize};
 pub struct Work {
     id: String,
     title: String,
-    #[serde(default)]
     author: String,
     relationships: Vec<String>,
     characters: Vec<String>,
     freeforms: Vec<String>,
-    #[serde(default = "default_naivedate")]
     date: NaiveDate,
-    #[serde(default)]
     language: String,
-    #[serde(default)]
     words: u32,
-    #[serde(default)]
     kudos: u32,
-    #[serde(default)]
     hits: u32,
-}
-
-fn default_naivedate() -> NaiveDate {
-    NaiveDate::parse_from_str("05 Dec 2020", "%d %b %Y").unwrap()
 }
 
 static SELECTOR_WORK: Lazy<Selector> = Lazy::new(|| Selector::parse("li.work").unwrap());
@@ -46,114 +37,98 @@ static SELECTOR_KUDOS: Lazy<Selector> =
     Lazy::new(|| Selector::parse("dl.stats > dd.kudos").unwrap());
 static SELECTOR_HITS: Lazy<Selector> = Lazy::new(|| Selector::parse("dl.stats > dd.hits").unwrap());
 
-pub fn search_page_to_works(body: &str) -> Vec<Work> {
+trait SelectExt {
+    fn next_text(&mut self) -> Result<&str>;
+
+    fn next_number(&mut self) -> Result<u32>;
+
+    fn collect_texts(&mut self) -> Result<Vec<String>>;
+}
+
+impl<'a, 'b> SelectExt for scraper::element_ref::Select<'a, 'b> {
+    fn next_text(&mut self) -> Result<&str> {
+        self.next()
+            .context("selector to find element")?
+            .text()
+            .next()
+            .context("element to have text")
+    }
+
+    fn next_number(&mut self) -> Result<u32> {
+        self.next_text()?
+            .replace(",", "")
+            .parse()
+            .context("failed to parse number")
+    }
+
+    fn collect_texts(&mut self) -> Result<Vec<String>> {
+        self.map(|element| {
+            element
+                .text()
+                .next()
+                .context("element to have text")
+                .map(ToOwned::to_owned)
+        })
+        .collect()
+    }
+}
+
+pub fn search_page_to_works(body: &str) -> Result<Vec<Work>> {
     let fragment = Html::parse_document(&body);
-    fragment
+    Ok(fragment
         .select(&*SELECTOR_WORK)
         .map(|work_element| {
             let id = work_element
                 .value()
                 .attr("id")
-                .expect("work to have id")
+                .context("work to have id")?
                 .strip_prefix("work_")
-                .expect("work id to have prefix")
+                .context("work id to have prefix")?
                 .to_owned();
+
             let mut title_author = work_element.select(&*SELECTOR_TITLE_AUTHOR);
-            let title = title_author
-                .next()
-                .expect("work to have title")
-                .text()
-                .next()
-                .expect("title to have text")
-                .to_owned();
-            let author = title_author
-                .next()
-                .expect("work to have author")
-                .text()
-                .next()
-                .expect("title to have text")
-                .to_owned();
+            let title = title_author.next_text().context("title")?.to_owned();
+            let author = title_author.next_text().context("author")?.to_owned();
+
             let relationships = work_element
                 .select(&*SELECTOR_RELATIONSHIP)
-                .map(|tag_element| {
-                    tag_element
-                        .text()
-                        .next()
-                        .expect("relationship tag to contain text")
-                        .to_owned()
-                })
-                .collect();
+                .collect_texts()
+                .context("relationships")?;
             let characters = work_element
                 .select(&*SELECTOR_CHARACTER)
-                .map(|tag_element| {
-                    tag_element
-                        .text()
-                        .next()
-                        .expect("character tag to contain text")
-                        .to_owned()
-                })
-                .collect();
+                .collect_texts()
+                .context("characters")?;
             let freeforms = work_element
                 .select(&*SELECTOR_FREEFORM)
-                .map(|tag_element| {
-                    tag_element
-                        .text()
-                        .next()
-                        .expect("freeform tag to contain text")
-                        .to_owned()
-                })
-                .collect();
+                .collect_texts()
+                .context("freeforms")?;
             let date = NaiveDate::parse_from_str(
                 work_element
                     .select(&*SELECTOR_DATE)
-                    .next()
-                    .expect("work to have date")
-                    .text()
-                    .next()
-                    .expect("date to have text"),
+                    .next_text()
+                    .context("date")?,
                 "%d %b %Y",
             )
             .expect("unexpected date format");
             let language = work_element
                 .select(&*SELECTOR_LANGUAGE)
-                .next()
-                .expect("work to have language")
-                .text()
-                .next()
-                .expect("language to have text")
+                .next_text()
+                .context("language")?
                 .to_owned();
             let words = work_element
                 .select(&*SELECTOR_WORDS)
-                .next()
-                .expect("work to have words")
-                .text()
-                .next()
-                .expect("words to have text")
-                .replace(",", "")
-                .parse()
-                .expect("invalid word count");
+                .next_number()
+                .context("words")?;
             let kudos = work_element
                 .select(&*SELECTOR_KUDOS)
-                .next()
-                .expect("work to have kudos")
-                .text()
-                .next()
-                .expect("kudos to have text")
-                .replace(",", "")
-                .parse()
-                .expect("invalid kudo count");
+                .next_number()
+                .context("kudos")?;
             let hits = work_element
                 .select(&*SELECTOR_HITS)
-                .next()
-                .expect("work to have hits")
-                .text()
-                .next()
-                .expect("hits to have text")
-                .replace(",", "")
-                .parse()
-                .expect("invalid hit count");
+                .next_number()
+                .context("hits")?;
 
-            Work {
+            Ok(Work {
                 id,
                 title,
                 author,
@@ -165,9 +140,9 @@ pub fn search_page_to_works(body: &str) -> Vec<Work> {
                 words,
                 kudos,
                 hits,
-            }
+            })
         })
-        .collect()
+        .collect::<Result<_>>()?)
 }
 
 #[cfg(test)]
@@ -181,7 +156,7 @@ mod tests {
     #[test]
     fn test_search_page_to_works() {
         assert_eq!(
-            search_page_to_works(SEARCH_HTML),
+            search_page_to_works(SEARCH_HTML).unwrap(),
             serde_json::from_str::<Vec<_>>(SEARCH_WORKS).expect("invalid test data")
         );
     }
