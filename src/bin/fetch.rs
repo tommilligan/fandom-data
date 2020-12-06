@@ -1,5 +1,5 @@
 use anyhow::Result;
-use ao3_fandom_vis::{request::page, scrape::search_page_to_works};
+use ao3_fandom_vis::scrape::{page_url, search_page_to_works, ENDPOINT_AO3};
 use rayon::prelude::*;
 use reqwest::{blocking::Client, Url};
 use std::io::{self, Write};
@@ -47,7 +47,7 @@ fn main() -> Result<()> {
         .into_par_iter()
         .map::<_, Result<(u32, Vec<_>)>>(|page_number| {
             log::info!("Processing page {}", page_number);
-            let url = Url::parse(&page(page_number))?;
+            let url = Url::parse(&page_url(ENDPOINT_AO3, page_number))?;
             let html = &client.get(url).send()?.text()?;
             let works = search_page_to_works(html)?;
 
