@@ -17,8 +17,12 @@ struct Opt {
     #[structopt(long = "elasticsearch")]
     elasticsearch: String,
 
-    /// Top n ships to display.
-    #[structopt(long = "limit", default_value = "20")]
+    /// Minimum number of works a tag must have to be displayed
+    #[structopt(long = "min-works", default_value = "50")]
+    min_works: usize,
+
+    /// Maximum number of ships to display
+    #[structopt(long = "limit", default_value = "1000")]
     limit: usize,
 
     /// Relationship type to display.
@@ -28,6 +32,7 @@ struct Opt {
 
 async fn relationship_frequencies(
     client: &Elasticsearch,
+    min_works: usize,
     limit: usize,
 ) -> Result<Vec<(String, u64)>> {
     let response = client
@@ -37,10 +42,11 @@ async fn relationship_frequencies(
               AGGREGATION_KEY: {
                 "terms": {
                   "field": FIELD_RELATIONSHIPS_KEYWORD,
+                  "min_doc_count": min_works,
+                  "size": limit,
                   "order": {
                     "_count": "desc"
                   },
-                  "size": limit
                 }
               }
             },
@@ -91,7 +97,7 @@ async fn main() -> Result<()> {
     let transport = Transport::single_node(&opt.elasticsearch)?;
     let client = Elasticsearch::new(transport);
 
-    let mut freqs: Vec<_> = relationship_frequencies(&client, opt.limit)
+    let mut freqs: Vec<_> = relationship_frequencies(&client, opt.min_works, opt.limit)
         .await?
         .into_iter()
         .filter_map(|(ship, count)| ship_to_characters(&ship).map(|characters| (characters, count)))

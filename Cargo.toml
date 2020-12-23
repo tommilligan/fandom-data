@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0.34"
-chord = "0.1.6"
+chord = { path = "../chord_rs" }
 chrono = { version = "0.4.19", features = ["serde"] }
 elasticsearch = "7.10.0-alpha.1"
 env_logger = "0.8.2"
