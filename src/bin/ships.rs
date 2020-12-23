@@ -2,6 +2,7 @@ use anyhow::{anyhow, Context, Error, Result};
 use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
 use itertools::Itertools;
+use palette::{rgb::LinSrgb, Hsv, IntoColor};
 use serde_json::{json, Value};
 use std::{collections::HashMap, str::FromStr};
 use structopt::StructOpt;
@@ -9,6 +10,7 @@ use structopt::StructOpt;
 const WORKS_INDEX: &str = "works";
 const AGGREGATION_KEY: &str = "aggregation_key";
 const FIELD_RELATIONSHIPS_KEYWORD: &str = "relationships.keyword";
+const GOLDEN_RATIO: f32 = 1.618033;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "fetch", about = "Fetch ao3 data")]
@@ -150,6 +152,17 @@ async fn main() -> Result<()> {
         matrix[character_two_index][character_one_index] = *count as f64;
     }
 
+    let colors: Vec<String> = character_list
+        .iter()
+        .enumerate()
+        .map(|(index, _name)| {
+            let color: LinSrgb<u8> = Hsv::new((index * 360) as f32 / GOLDEN_RATIO, 0.68, 0.69)
+                .into_rgb()
+                .into_format();
+            format!("#{:X}{:X}{:X}", color.red, color.green, color.blue)
+        })
+        .collect();
+
     Chord {
         matrix,
         names: character_list,
@@ -157,6 +170,7 @@ async fn main() -> Result<()> {
         width: 1150.,
         margin: 75.,
         font_size_large: "14px".to_owned(),
+        colors,
         ..Chord::default()
     }
     .to_html();
