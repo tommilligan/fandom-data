@@ -1,7 +1,6 @@
 use anyhow::{anyhow, Context, Error, Result};
 use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
-use itertools::Itertools;
 use palette::{rgb::LinSrgb, Hsv, IntoColor};
 use serde_json::{json, Value};
 use std::{collections::HashMap, str::FromStr};
@@ -27,9 +26,9 @@ struct Opt {
     #[structopt(long = "limit", default_value = "1000")]
     limit: usize,
 
-    /// Relationship type to display.
-    #[structopt(long = "ship-type", default_value = "romantic")]
-    ship_type: Ship,
+    /// Relationship kidn to display.
+    #[structopt(long = "ship-kind", default_value = "romantic")]
+    ship_kind: ShipKind,
 }
 
 async fn relationship_frequencies(
@@ -99,26 +98,28 @@ async fn main() -> Result<()> {
     let transport = Transport::single_node(&opt.elasticsearch)?;
     let client = Elasticsearch::new(transport);
 
-    let mut freqs: Vec<_> = relationship_frequencies(&client, opt.min_works, opt.limit)
+    let freqs: Vec<_> = relationship_frequencies(&client, opt.min_works, opt.limit)
         .await?
         .into_iter()
-        .filter_map(|(ship, count)| ship_to_characters(&ship).map(|characters| (characters, count)))
-        .filter(|(ship, _count)| ship.1 == opt.ship_type)
+        .filter_map(|(ship, count)| {
+            Ship::from_str(&ship)
+                .map(|ship| (ship, count))
+                .map_err(|error| {
+                    log::warn!("Dropping ship: {}", error);
+                    error
+                })
+                .ok()
+        })
+        .filter(|(ship, _count)| ship.kind == opt.ship_kind)
         .collect();
-    let original_freq_length = freqs.len();
-    freqs.sort_by_key(|(ship, count)| (ship.0.clone(), u64::MAX - count));
-    freqs.dedup_by_key(|(ship, _count)| ship.0.clone());
-    let dedup_freq_length = freqs.len();
-    let removed_length = original_freq_length - dedup_freq_length;
-    if removed_length > 0 {
-        log::warn!("Removed {} duplicate ship tags", removed_length);
-    }
 
     // Count up mentions of each character
     let mut characters: HashMap<&str, u64> = HashMap::default();
     for (ship, count) in freqs.iter() {
-        *characters.entry(&ship.0 .0).or_default() += count;
-        *characters.entry(&ship.0 .1).or_default() += count
+        // We add counts here, as it's possible we have duplicate ship tags
+        // due to inconsistent tagging
+        *characters.entry(&ship.characters[0]).or_default() += count;
+        *characters.entry(&ship.characters[1]).or_default() += count;
     }
 
     let mut character_list = characters
@@ -126,6 +127,7 @@ async fn main() -> Result<()> {
         .map(|character| (*character).to_owned())
         .collect::<Vec<String>>();
     character_list.sort_unstable();
+
     let character_index: HashMap<&str, usize> = character_list
         .iter()
         .enumerate()
@@ -134,22 +136,14 @@ async fn main() -> Result<()> {
 
     let mut matrix: Vec<Vec<f64>> = vec![vec![0.; character_list.len()]; character_list.len()];
     for (ship, count) in freqs.iter() {
-        // let character_one_freq: f64 = *count as f64
-        //     / *characters
-        //         .get(&character_one.as_ref())
-        //         .expect("character to have total frequency") as f64;
-        // let character_two_freq: f64 = *count as f64
-        //     / *characters
-        //         .get(&character_two.as_ref())
-        //         .expect("character to have total frequency") as f64;
         let character_one_index = *character_index
-            .get(&ship.0 .0.as_ref())
+            .get(&ship.characters[0].as_ref())
             .expect("character to have index");
         let character_two_index = *character_index
-            .get(&ship.0 .1.as_ref())
+            .get(&ship.characters[1].as_ref())
             .expect("character to have index");
-        matrix[character_one_index][character_two_index] = *count as f64;
-        matrix[character_two_index][character_one_index] = *count as f64;
+        matrix[character_one_index][character_two_index] += *count as f64;
+        matrix[character_two_index][character_one_index] += *count as f64;
     }
 
     let colors: Vec<String> = character_list
@@ -179,53 +173,67 @@ async fn main() -> Result<()> {
 }
 
 #[derive(Debug, PartialEq)]
-enum Ship {
+struct Ship {
+    characters: Vec<String>,
+    kind: ShipKind,
+}
+
+impl FromStr for Ship {
+    type Err = Error;
+
+    /// Given a ship tag, returns a pair of characters in the ship.
+    ///
+    /// The pair of characters will be sorted, to make tag deduplication easier.
+    ///
+    /// This function will return `None` if:
+    ///
+    /// - the ship kind could not be determined
+    /// - the ship does not contain exactly two characters (sorry, poly ships =( )
+    ///
+    /// A bit of data munging here to remove duplicates.
+    fn from_str(ship: &str) -> Result<Self> {
+        let (delimiter, kind) = if ship.contains('/') {
+            ('/', ShipKind::Romantic)
+        } else if ship.contains('&') {
+            ('&', ShipKind::Platonic)
+        } else {
+            return Err(anyhow!("Unknown ship kind in: '{}'", ship));
+        };
+
+        // Split on separators to get characters
+        let mut characters: Vec<String> = ship
+            .split(delimiter)
+            .map(|mut name| {
+                if let Some(fandom_start) = name.find('(') {
+                    name = &name[..fandom_start];
+                }
+                name.trim().to_owned()
+            })
+            .collect();
+
+        if characters.len() != 2 {
+            return Err(anyhow!("Ship must have exactly two characters: '{}'", ship));
+        }
+        characters.sort_unstable();
+
+        Ok(Self { characters, kind })
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum ShipKind {
     Romantic,
     Platonic,
 }
 
-impl FromStr for Ship {
+impl FromStr for ShipKind {
     type Err = Error;
 
     fn from_str(string: &str) -> Result<Self> {
         match string {
             "romantic" => Ok(Self::Romantic),
             "platonic" => Ok(Self::Platonic),
-            _ => Err(anyhow!("Invalid ship type: '{}'", string)),
+            _ => Err(anyhow!("Invalid ship kind: '{}'", string)),
         }
-    }
-}
-
-/// Given a ship tag, returns a list of characters in the ship.
-///
-/// A bit of data munging here to remove duplicates.
-fn ship_to_characters(original_ship: &str) -> Option<((String, String), Ship)> {
-    let mut ship = original_ship;
-    // Trim off fandom if present
-    if let Some(fandom_start) = ship.find('(') {
-        ship = &ship[..fandom_start];
-    }
-
-    // Split on separators
-    let mut characters: Vec<String> = ship
-        .split(&['/', '&'][..])
-        .map(|s| s.trim().to_owned())
-        .collect();
-
-    // Coocurrance matrix doesn't work for poly ships?
-    if characters.len() != 2 {
-        log::warn!("Invalid characters length: '{}'", original_ship);
-        return None;
-    }
-    characters.sort_unstable();
-    let characters: (String, String) = characters.into_iter().collect_tuple().unwrap();
-
-    if ship.contains('/') {
-        Some((characters, Ship::Romantic))
-    } else if ship.contains('&') {
-        Some((characters, Ship::Platonic))
-    } else {
-        log::warn!("Invalid ship name: '{}'", original_ship);
-        None
     }
 }
