@@ -3,7 +3,10 @@ use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
 use palette::{rgb::LinSrgb, Hsv, IntoColor};
 use serde_json::{json, Value};
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+};
 use structopt::StructOpt;
 
 const WORKS_INDEX: &str = "works";
@@ -31,7 +34,10 @@ struct Opt {
     ship_kind: ShipKind,
 }
 
-async fn relationship_frequencies(
+/// Load the frequencies of ship tags from all works.
+///
+/// Returns a list of `(ship name, count)` pairs.
+async fn ship_frequencies(
     client: &Elasticsearch,
     min_works: usize,
     limit: usize,
@@ -98,43 +104,52 @@ async fn main() -> Result<()> {
     let transport = Transport::single_node(&opt.elasticsearch)?;
     let client = Elasticsearch::new(transport);
 
-    let freqs: Vec<_> = relationship_frequencies(&client, opt.min_works, opt.limit)
-        .await?
+    let results = ship_frequencies(&client, opt.min_works, opt.limit).await?;
+    let freqs: Vec<_> = results
         .into_iter()
         .filter_map(|(ship, count)| {
             Ship::from_str(&ship)
-                .map(|ship| (ship, count))
+                // A bit of munging - we can't handle tags where we don't have 2 characters
+                .and_then(|ship| {
+                    if ship.characters.len() == 2 {
+                        Ok(ship)
+                    } else {
+                        Err(anyhow!(
+                            "Ship must have exactly two characters: '{:?}'",
+                            ship.characters
+                        ))
+                    }
+                })
                 .map_err(|error| {
                     log::warn!("Dropping ship: {}", error);
                     error
                 })
                 .ok()
+                .map(|ship| (ship, count))
         })
         .filter(|(ship, _count)| ship.kind == opt.ship_kind)
         .collect();
 
-    // Count up mentions of each character
-    let mut characters: HashMap<&str, u64> = HashMap::default();
-    for (ship, count) in freqs.iter() {
-        // We add counts here, as it's possible we have duplicate ship tags
-        // due to inconsistent tagging
-        *characters.entry(&ship.characters[0]).or_default() += count;
-        *characters.entry(&ship.characters[1]).or_default() += count;
+    // Get unique, sorted list of all characters
+    let mut characters: HashSet<&str> = HashSet::default();
+    for (ship, _count) in freqs.iter() {
+        for character in ship.characters.iter() {
+            characters.insert(&character);
+        }
     }
+    let mut names: Vec<String> = characters.into_iter().map(ToOwned::to_owned).collect();
+    names.sort_unstable();
 
-    let mut character_list = characters
-        .keys()
-        .map(|character| (*character).to_owned())
-        .collect::<Vec<String>>();
-    character_list.sort_unstable();
-
-    let character_index: HashMap<&str, usize> = character_list
+    // Lookup from character name to index in the sorted list above
+    // which will also be the index in the co-occurance matrix below
+    let character_index: HashMap<&str, usize> = names
         .iter()
         .enumerate()
         .map(|(index, character)| (character.as_ref(), index))
         .collect();
 
-    let mut matrix: Vec<Vec<f64>> = vec![vec![0.; character_list.len()]; character_list.len()];
+    // Initialize the matrix with zeroes
+    let mut matrix: Vec<Vec<f64>> = vec![vec![0.; names.len()]; names.len()];
     for (ship, count) in freqs.iter() {
         let character_one_index = *character_index
             .get(&ship.characters[0].as_ref())
@@ -142,24 +157,24 @@ async fn main() -> Result<()> {
         let character_two_index = *character_index
             .get(&ship.characters[1].as_ref())
             .expect("character to have index");
+        // Add rather than assigning here, to allow for duplicate ship tags
         matrix[character_one_index][character_two_index] += *count as f64;
         matrix[character_two_index][character_one_index] += *count as f64;
     }
 
-    let colors: Vec<String> = character_list
+    // Generate colors for each name
+    let colors: Vec<String> = names
         .iter()
         .enumerate()
         .map(|(index, _name)| {
-            let color: LinSrgb<u8> = Hsv::new((index * 360) as f32 / GOLDEN_RATIO, 0.68, 0.69)
-                .into_rgb()
-                .into_format();
-            format!("#{:X}{:X}{:X}", color.red, color.green, color.blue)
+            let color = golden_color(index);
+            color.as_hex()
         })
         .collect();
 
     Chord {
         matrix,
-        names: character_list,
+        names,
         wrap_labels: false,
         width: 1150.,
         margin: 75.,
@@ -172,7 +187,26 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-#[derive(Debug, PartialEq)]
+/// Use the golden ratio to deal out differing colors for a large number of items.
+///
+/// Color hues remain evently distributed across both small and large sets.
+fn golden_color(index: usize) -> LinSrgb<u8> {
+    Hsv::new((index * 360) as f32 / GOLDEN_RATIO, 0.68, 0.69)
+        .into_rgb()
+        .into_format::<u8>()
+}
+
+trait DisplayHex {
+    fn as_hex(&self) -> String;
+}
+
+impl DisplayHex for LinSrgb<u8> {
+    fn as_hex(&self) -> String {
+        format!("#{:X}{:X}{:X}", self.red, self.green, self.blue)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 struct Ship {
     characters: Vec<String>,
     kind: ShipKind,
@@ -188,9 +222,6 @@ impl FromStr for Ship {
     /// This function will return `None` if:
     ///
     /// - the ship kind could not be determined
-    /// - the ship does not contain exactly two characters (sorry, poly ships =( )
-    ///
-    /// A bit of data munging here to remove duplicates.
     fn from_str(ship: &str) -> Result<Self> {
         let (delimiter, kind) = if ship.contains('/') {
             ('/', ShipKind::Romantic)
@@ -210,17 +241,13 @@ impl FromStr for Ship {
                 name.trim().to_owned()
             })
             .collect();
-
-        if characters.len() != 2 {
-            return Err(anyhow!("Ship must have exactly two characters: '{}'", ship));
-        }
         characters.sort_unstable();
 
         Ok(Self { characters, kind })
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 enum ShipKind {
     Romantic,
     Platonic,
