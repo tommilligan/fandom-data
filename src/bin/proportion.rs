@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use ao3_fandom_vis::search::TagKind;
 use chrono::{Date, NaiveDateTime, TimeZone, Utc};
 use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
 use plotters::prelude::*;
@@ -7,7 +8,6 @@ use structopt::StructOpt;
 
 const WORKS_INDEX: &str = "works";
 const AGGREGATION_KEY: &str = "aggregation_key";
-const FIELD_RELATIONSHIPS_KEYWORD: &str = "relationships.keyword";
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "fetch", about = "Fetch ao3 data")]
@@ -36,7 +36,7 @@ async fn ship_histogram(
           "aggs": {
             AGGREGATION_KEY: {
               "terms": {
-                "field": FIELD_RELATIONSHIPS_KEYWORD,
+                "field": TagKind::Relationship.to_keyword_field(),
                 "order": {
                   "_count": "desc"
                 },

@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use ao3_fandom_vis::scrape::Work;
+use ao3_fandom_vis::{scrape::Work, search::TagKind};
 use elasticsearch::{
     http::transport::Transport,
     indices::{Indices, IndicesPutMappingParts},
@@ -29,13 +29,13 @@ static MAPPING_WORKS: Lazy<Value> = Lazy::new(|| {
         "author": {
           "type": "keyword"
         },
-        "relationships": {
+        TagKind::Relationship.to_field(): {
           "type": "keyword"
         },
-        "characters": {
+        TagKind::Character.to_field(): {
           "type": "keyword"
         },
-        "freeforms": {
+        TagKind::Freeform.to_field(): {
           "type": "keyword"
         },
         "date": {
@@ -101,20 +101,11 @@ async fn main() -> Result<()> {
             ops.push(BulkOperation::index(work).id(id))?;
         }
 
-        let response = client
+        client
             .bulk(BulkParts::Index("works"))
             .body(vec![ops])
             .send()
             .await?;
-
-        // get the HTTP response status code
-        let status_code = response.status_code();
-
-        // read the response body. Consumes search_response
-        let response_body = response.json::<Value>().await?;
-
-        // read fields from the response body
-        let took = response_body["took"].as_i64().unwrap();
     }
 
     Ok(())

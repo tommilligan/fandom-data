@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Error, Result};
-use ao3_fandom_vis::search::ship_frequencies;
+use ao3_fandom_vis::search::{ship_frequencies, ShipKind, TagKind};
 use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch};
 use palette::{rgb::LinSrgb, Hsv, IntoColor};
@@ -26,7 +26,7 @@ struct Opt {
     #[structopt(long = "limit", default_value = "1000")]
     limit: usize,
 
-    /// Relationship kidn to display.
+    /// Relationship kind to display.
     #[structopt(long = "ship-kind", default_value = "romantic")]
     ship_kind: ShipKind,
 }
@@ -39,7 +39,14 @@ async fn main() -> Result<()> {
     let transport = Transport::single_node(&opt.elasticsearch)?;
     let client = Elasticsearch::new(transport);
 
-    let results = ship_frequencies(&client, opt.min_works, opt.limit).await?;
+    let results = ship_frequencies(
+        &client,
+        opt.min_works,
+        opt.limit,
+        TagKind::Relationship,
+        None,
+    )
+    .await?;
     let freqs: Vec<_> = results
         .into_iter()
         .filter_map(|(ship, count)| {
@@ -179,23 +186,5 @@ impl FromStr for Ship {
         characters.sort_unstable();
 
         Ok(Self { characters, kind })
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
-enum ShipKind {
-    Romantic,
-    Platonic,
-}
-
-impl FromStr for ShipKind {
-    type Err = Error;
-
-    fn from_str(string: &str) -> Result<Self> {
-        match string {
-            "romantic" => Ok(Self::Romantic),
-            "platonic" => Ok(Self::Platonic),
-            _ => Err(anyhow!("Invalid ship kind: '{}'", string)),
-        }
     }
 }
