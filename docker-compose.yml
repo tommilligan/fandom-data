@@ -1,0 +1,22 @@
+version: "3.7"
+
+volumes:
+  ao3-fandom-vis-elasticsearch:
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.9.3
+    volumes:
+      - ao3-fandom-vis-elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - "172.17.0.1:9200:9200"
+    environment:
+      - discovery.type=single-node
+
+  kibana:
+    image: kibana:7.9.3
+    ports:
+      - "172.17.0.1:5602:5602"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://172.17.0.1:9200
+      - SERVER_PORT=5602
