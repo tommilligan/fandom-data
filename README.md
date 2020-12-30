@@ -37,3 +37,23 @@ Works are stored with their Archive id, so it's fine to rerun this step multiple
 ## Inspecting the data
 
 You can view the raw data using the Kibana toolset by running `docker-compose up -d kibana` and then going to `http://172.17.0.1`.
+
+## Fair Use
+
+I believe this codebase and derived tooling is in line with [AO3's Terms of Service](https://archiveofourown.org/tos) as of 2020-12-30.
+
+Some portions of this code act as a scraper by making multiple requests to the Archive. Please respect AO3's rate limiting if you hit it, and do not try to circumvent it.
+
+While using this repo, please be aware of the following sections of the ToS:
+
+> #### I.D.7
+>
+> You agree not to use the Service (as well as the e-mail addresses and URLs of OTW sites): to interfere with or disrupt the Service, any OTW-hosted Content or sites, servers, Services or networks connected to OTW sites;
+>
+> #### IV.C
+>
+> Conduct that threatens the technical integrity of the Archive [...] will result in an immediate account suspension [...]
+>
+> Users may be permanently suspended for threatening the technical integrity of the Archive the first time they do so. Such suspensions may be appealed using the ordinary appeal process.
+
+Thank you to everyone who donates their time to support the Archive! Learn more about [contributing here](https://github.com/otwcode/otwarchive#how-to-contribute)
