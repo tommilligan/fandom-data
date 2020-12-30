@@ -3,6 +3,7 @@ use ao3_fandom_vis::search::{ship_frequencies, ShipKind, TagKind};
 use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch};
 use palette::{rgb::LinSrgb, Hsv, IntoColor};
+use serde::Serialize;
 use std::{
     collections::{HashMap, HashSet},
     str::FromStr,
@@ -29,6 +30,10 @@ struct Opt {
     /// Relationship kind to display.
     #[structopt(long = "ship-kind", default_value = "romantic")]
     ship_kind: ShipKind,
+
+    /// Output raw data instead of nice format.
+    #[structopt(long = "raw")]
+    raw: bool,
 }
 
 #[tokio::main]
@@ -47,7 +52,10 @@ async fn main() -> Result<()> {
         None,
     )
     .await?;
-    let freqs: Vec<_> = results
+
+    // We key by parsed ship type to collate duplicates
+    let mut freqs: HashMap<Ship, u64> = HashMap::default();
+    for (ship, count) in results
         .into_iter()
         .filter_map(|(ship, count)| {
             Ship::from_str(&ship)
@@ -70,8 +78,37 @@ async fn main() -> Result<()> {
                 .map(|ship| (ship, count))
         })
         .filter(|(ship, _count)| ship.kind == opt.ship_kind)
-        .collect();
+    {
+        // Add rather than assigning here, to allow for duplicate ship tags
+        *freqs.entry(ship).or_default() += count;
+    }
 
+    if opt.raw {
+        output_raw(freqs)?;
+    } else {
+        output_chord(freqs);
+    }
+
+    Ok(())
+}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, Serialize)]
+struct ShipCount {
+    ship: Ship,
+    count: u64,
+}
+
+fn output_raw(freqs: HashMap<Ship, u64>) -> Result<()> {
+    let mut sorted_by_count: Vec<ShipCount> = freqs
+        .into_iter()
+        .map(|(ship, count)| ShipCount { ship, count })
+        .collect();
+    sorted_by_count.sort();
+    println!("{}", serde_json::to_string(&sorted_by_count)?);
+    Ok(())
+}
+
+fn output_chord(freqs: HashMap<Ship, u64>) {
     // Get unique, sorted list of all characters
     let mut characters: HashSet<&str> = HashSet::default();
     for (ship, _count) in freqs.iter() {
@@ -99,7 +136,6 @@ async fn main() -> Result<()> {
         let character_two_index = *character_index
             .get(&ship.characters[1].as_ref())
             .expect("character to have index");
-        // Add rather than assigning here, to allow for duplicate ship tags
         matrix[character_one_index][character_two_index] += *count as f64;
         matrix[character_two_index][character_one_index] += *count as f64;
     }
@@ -125,8 +161,6 @@ async fn main() -> Result<()> {
         ..Chord::default()
     }
     .to_html();
-
-    Ok(())
 }
 
 /// Use the golden ratio to deal out differing colors for a large number of items.
@@ -148,7 +182,7 @@ impl DisplayHex for LinSrgb<u8> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, Serialize)]
 struct Ship {
     characters: Vec<String>,
     kind: ShipKind,

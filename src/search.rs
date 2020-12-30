@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Context, Error, Result};
 use elasticsearch::{Elasticsearch, SearchParts};
+use serde::Serialize;
 use serde_json::{json, Value};
 use std::str::FromStr;
 
@@ -151,7 +152,8 @@ pub async fn significant_tags(
         .collect::<Result<_>>()?)
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Hash, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum ShipKind {
     Romantic,
     Platonic,
