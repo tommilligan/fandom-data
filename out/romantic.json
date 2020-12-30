@@ -1,0 +1,392 @@
+[
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Azula"
+      ],
+      "kind": "romantic"
+    },
+    "count": 63
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Katara"
+      ],
+      "kind": "romantic"
+    },
+    "count": 2260
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Toph Beifong"
+      ],
+      "kind": "romantic"
+    },
+    "count": 215
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 423
+  },
+  {
+    "ship": {
+      "characters": [
+        "Asami Sato",
+        "Korra"
+      ],
+      "kind": "romantic"
+    },
+    "count": 285
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Katara"
+      ],
+      "kind": "romantic"
+    },
+    "count": 130
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Mai"
+      ],
+      "kind": "romantic"
+    },
+    "count": 94
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Ozai"
+      ],
+      "kind": "romantic"
+    },
+    "count": 66
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Sokka"
+      ],
+      "kind": "romantic"
+    },
+    "count": 191
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Ty Lee"
+      ],
+      "kind": "romantic"
+    },
+    "count": 745
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 124
+  },
+  {
+    "ship": {
+      "characters": [
+        "Bato",
+        "Hakoda"
+      ],
+      "kind": "romantic"
+    },
+    "count": 221
+  },
+  {
+    "ship": {
+      "characters": [
+        "Bolin",
+        "Opal"
+      ],
+      "kind": "romantic"
+    },
+    "count": 83
+  },
+  {
+    "ship": {
+      "characters": [
+        "Hakoda",
+        "Kya"
+      ],
+      "kind": "romantic"
+    },
+    "count": 68
+  },
+  {
+    "ship": {
+      "characters": [
+        "Jet",
+        "Katara"
+      ],
+      "kind": "romantic"
+    },
+    "count": 71
+  },
+  {
+    "ship": {
+      "characters": [
+        "Jet",
+        "Sokka"
+      ],
+      "kind": "romantic"
+    },
+    "count": 59
+  },
+  {
+    "ship": {
+      "characters": [
+        "Jet",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 401
+  },
+  {
+    "ship": {
+      "characters": [
+        "Jin",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 101
+  },
+  {
+    "ship": {
+      "characters": [
+        "Katara",
+        "Yue"
+      ],
+      "kind": "romantic"
+    },
+    "count": 62
+  },
+  {
+    "ship": {
+      "characters": [
+        "Katara",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 3769
+  },
+  {
+    "ship": {
+      "characters": [
+        "Kya II",
+        "Lin Beifong"
+      ],
+      "kind": "romantic"
+    },
+    "count": 86
+  },
+  {
+    "ship": {
+      "characters": [
+        "Kyoshi",
+        "Rangi"
+      ],
+      "kind": "romantic"
+    },
+    "count": 186
+  },
+  {
+    "ship": {
+      "characters": [
+        "Lin Beifong",
+        "Tenzin"
+      ],
+      "kind": "romantic"
+    },
+    "count": 52
+  },
+  {
+    "ship": {
+      "characters": [
+        "Mai",
+        "Ty Lee"
+      ],
+      "kind": "romantic"
+    },
+    "count": 446
+  },
+  {
+    "ship": {
+      "characters": [
+        "Mai",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 1447
+  },
+  {
+    "ship": {
+      "characters": [
+        "Original Female Character",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 152
+  },
+  {
+    "ship": {
+      "characters": [
+        "Ozai",
+        "Ursa"
+      ],
+      "kind": "romantic"
+    },
+    "count": 209
+  },
+  {
+    "ship": {
+      "characters": [
+        "Reader",
+        "Sokka"
+      ],
+      "kind": "romantic"
+    },
+    "count": 54
+  },
+  {
+    "ship": {
+      "characters": [
+        "Reader",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 161
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Suki"
+      ],
+      "kind": "romantic"
+    },
+    "count": 1579
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Toph Bei Fong"
+      ],
+      "kind": "romantic"
+    },
+    "count": 71
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Toph Beifong"
+      ],
+      "kind": "romantic"
+    },
+    "count": 307
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Yue"
+      ],
+      "kind": "romantic"
+    },
+    "count": 270
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 3287
+  },
+  {
+    "ship": {
+      "characters": [
+        "Suki",
+        "Toph Beifong"
+      ],
+      "kind": "romantic"
+    },
+    "count": 62
+  },
+  {
+    "ship": {
+      "characters": [
+        "Suki",
+        "Ty Lee"
+      ],
+      "kind": "romantic"
+    },
+    "count": 62
+  },
+  {
+    "ship": {
+      "characters": [
+        "Suki",
+        "Yue"
+      ],
+      "kind": "romantic"
+    },
+    "count": 71
+  },
+  {
+    "ship": {
+      "characters": [
+        "Suki",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 242
+  },
+  {
+    "ship": {
+      "characters": [
+        "Toph Beifong",
+        "Zuko"
+      ],
+      "kind": "romantic"
+    },
+    "count": 93
+  }
+]

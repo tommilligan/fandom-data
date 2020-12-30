@@ -1,0 +1,392 @@
+[
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Katara"
+      ],
+      "kind": "platonic"
+    },
+    "count": 307
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Sokka"
+      ],
+      "kind": "platonic"
+    },
+    "count": 157
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "The Gaang"
+      ],
+      "kind": "platonic"
+    },
+    "count": 95
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Toph Beifong"
+      ],
+      "kind": "platonic"
+    },
+    "count": 88
+  },
+  {
+    "ship": {
+      "characters": [
+        "Aang",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 579
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Iroh"
+      ],
+      "kind": "platonic"
+    },
+    "count": 98
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Katara"
+      ],
+      "kind": "platonic"
+    },
+    "count": 66
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Mai"
+      ],
+      "kind": "platonic"
+    },
+    "count": 102
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Ozai"
+      ],
+      "kind": "platonic"
+    },
+    "count": 103
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Sokka"
+      ],
+      "kind": "platonic"
+    },
+    "count": 50
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Ty Lee"
+      ],
+      "kind": "platonic"
+    },
+    "count": 112
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Ursa"
+      ],
+      "kind": "platonic"
+    },
+    "count": 130
+  },
+  {
+    "ship": {
+      "characters": [
+        "Azula",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 858
+  },
+  {
+    "ship": {
+      "characters": [
+        "Hakoda",
+        "Sokka"
+      ],
+      "kind": "platonic"
+    },
+    "count": 103
+  },
+  {
+    "ship": {
+      "characters": [
+        "Hakoda",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 182
+  },
+  {
+    "ship": {
+      "characters": [
+        "Iroh",
+        "Lu Ten"
+      ],
+      "kind": "platonic"
+    },
+    "count": 54
+  },
+  {
+    "ship": {
+      "characters": [
+        "Iroh",
+        "Ozai"
+      ],
+      "kind": "platonic"
+    },
+    "count": 67
+  },
+  {
+    "ship": {
+      "characters": [
+        "Iroh",
+        "Toph Beifong"
+      ],
+      "kind": "platonic"
+    },
+    "count": 52
+  },
+  {
+    "ship": {
+      "characters": [
+        "Iroh",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 1185
+  },
+  {
+    "ship": {
+      "characters": [
+        "Izumi",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 111
+  },
+  {
+    "ship": {
+      "characters": [
+        "Jet",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 90
+  },
+  {
+    "ship": {
+      "characters": [
+        "Katara",
+        "Sokka"
+      ],
+      "kind": "platonic"
+    },
+    "count": 399
+  },
+  {
+    "ship": {
+      "characters": [
+        "Katara",
+        "Toph Beifong"
+      ],
+      "kind": "platonic"
+    },
+    "count": 125
+  },
+  {
+    "ship": {
+      "characters": [
+        "Katara",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 727
+  },
+  {
+    "ship": {
+      "characters": [
+        "Lu Ten",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 74
+  },
+  {
+    "ship": {
+      "characters": [
+        "Mai",
+        "Ty Lee"
+      ],
+      "kind": "platonic"
+    },
+    "count": 80
+  },
+  {
+    "ship": {
+      "characters": [
+        "Mai",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 160
+  },
+  {
+    "ship": {
+      "characters": [
+        "Ozai",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 199
+  },
+  {
+    "ship": {
+      "characters": [
+        "Reader",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 54
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Suki"
+      ],
+      "kind": "platonic"
+    },
+    "count": 116
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "The Gaang"
+      ],
+      "kind": "platonic"
+    },
+    "count": 59
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Toph Beifong"
+      ],
+      "kind": "platonic"
+    },
+    "count": 179
+  },
+  {
+    "ship": {
+      "characters": [
+        "Sokka",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 681
+  },
+  {
+    "ship": {
+      "characters": [
+        "Suki",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 177
+  },
+  {
+    "ship": {
+      "characters": [
+        "The Fire Nation",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 60
+  },
+  {
+    "ship": {
+      "characters": [
+        "The Gaang",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 749
+  },
+  {
+    "ship": {
+      "characters": [
+        "Toph Beifong",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 595
+  },
+  {
+    "ship": {
+      "characters": [
+        "Ursa",
+        "Zuko"
+      ],
+      "kind": "platonic"
+    },
+    "count": 180
+  },
+  {
+    "ship": {
+      "characters": [
+        "Zuko",
+        "Zuko's Crew"
+      ],
+      "kind": "platonic"
+    },
+    "count": 93
+  }
+]
