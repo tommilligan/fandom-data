@@ -1,4 +1,6 @@
-# AO3 Fandom Visualization
+# fandom-data
+
+Analyse and visualise fandom data from AO3.
 
 ## Downloading data for a fandom
 
