@@ -1,5 +1,5 @@
 use anyhow::Result;
-use ao3_fandom_vis::scrape::{page_url, search_page_to_works, ENDPOINT_AO3};
+use fandom_data::scrape::{page_url, search_page_to_works, ENDPOINT_AO3};
 use rayon::prelude::*;
 use reqwest::{blocking::Client, Url};
 use std::io::{self, Write};
@@ -53,8 +53,8 @@ fn main() -> Result<()> {
 
             let mut handle = stdout.lock();
             for work in works.iter() {
-                handle.write(&serde_json::to_string(work)?.as_bytes())?;
-                handle.write("\n".as_bytes())?;
+                handle.write_all(&serde_json::to_string(work)?.as_bytes())?;
+                handle.write_all(b"\n")?;
             }
 
             if let Some(interval) = interval {

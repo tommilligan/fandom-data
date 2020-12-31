@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Error, Result};
-use ao3_fandom_vis::search::{ship_frequencies, ShipKind, TagKind};
 use chord::{Chord, Plot};
 use elasticsearch::{http::transport::Transport, Elasticsearch};
+use fandom_data::search::{ship_frequencies, ShipKind, TagKind};
 use palette::{rgb::LinSrgb, Hsv, IntoColor};
 use serde::Serialize;
 use std::{

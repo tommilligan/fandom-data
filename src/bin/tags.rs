@@ -1,6 +1,6 @@
 use anyhow::Result;
-use ao3_fandom_vis::search::{significant_tags, TagKind};
 use elasticsearch::{http::transport::Transport, Elasticsearch};
+use fandom_data::search::{significant_tags, TagKind};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         for tag in tags.iter() {
             println!("- {}", tag);
         }
-        println!("");
+        println!();
     }
     Ok(())
 }

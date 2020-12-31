@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
-use ao3_fandom_vis::search::TagKind;
 use chrono::{Date, NaiveDateTime, TimeZone, Utc};
 use elasticsearch::{http::transport::Transport, Elasticsearch, SearchParts};
+use fandom_data::search::TagKind;
 use plotters::prelude::*;
 use serde_json::{json, Value};
 use structopt::StructOpt;
@@ -79,7 +79,7 @@ async fn ship_histogram(
         .as_array()
         .context("Response buckets array")?;
     Ok(buckets
-        .into_iter()
+        .iter()
         .map(|bucket| {
             Ok((
                 bucket
@@ -95,7 +95,7 @@ async fn ship_histogram(
                     .context("sub agg buckets key")?
                     .as_array()
                     .context("sub agg buckets array")?
-                    .into_iter()
+                    .iter()
                     .map(|bucket| {
                         Ok((
                             Date::from_utc(

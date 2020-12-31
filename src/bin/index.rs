@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
-use ao3_fandom_vis::{scrape::Work, search::TagKind};
 use elasticsearch::{
     http::transport::Transport,
     indices::{Indices, IndicesPutMappingParts},
     BulkOperation, BulkOperations, BulkParts, Elasticsearch,
 };
+use fandom_data::{scrape::Work, search::TagKind};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use serde_json::{json, Value};
