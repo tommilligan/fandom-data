@@ -1,35 +1,43 @@
 use anyhow::Result;
+use clap::Parser;
 use fandom_data::scrape::{page_url, search_page_to_works, ENDPOINT_AO3};
 use rayon::prelude::*;
 use reqwest::{blocking::Client, Url};
 use std::io::{self, Write};
 use std::{thread::sleep, time::Duration};
-use structopt::StructOpt;
 
-#[derive(Debug, StructOpt)]
-#[structopt(name = "fetch", about = "Fetch ao3 data")]
+#[derive(Debug, Parser)]
+#[clap(name = "fetch", about = "Fetch ao3 data")]
 struct Opt {
     /// Page to start fetching from
-    #[structopt(long = "start", default_value = "1")]
+    #[clap(long, default_value = "1")]
     start: u32,
 
     /// Number of pages to fetch at most
-    #[structopt(long = "count", default_value = "1")]
+    #[clap(long, default_value = "1")]
     count: u32,
 
+    /// Name of fandom
+    #[clap(long, required_unless_present_any(&["author"]))]
+    fandom: Option<String>,
+
+    /// Name of author
+    #[clap(long, required_unless_present_any(&["fandom"]))]
+    author: Option<String>,
+
     /// Interval between requests in seconds, to avoid rate limiting
-    #[structopt(long = "interval")]
+    #[clap(long)]
     interval: Option<u64>,
 
     /// Number of requests to process in parallel
-    #[structopt(short = "n", long = "threads", default_value = "1")]
+    #[clap(short = 'n', long, default_value = "1")]
     threads: usize,
 }
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
     rayon::ThreadPoolBuilder::new()
         .num_threads(opt.threads)
         .build_global()
@@ -39,6 +47,8 @@ fn main() -> Result<()> {
     let page_start = opt.start;
     let page_count = opt.count;
     let page_end = page_start + page_count;
+    let fandom = opt.fandom.unwrap_or_default();
+    let author = opt.author.unwrap_or_default();
     let client = Client::new();
 
     let stdout = io::stdout();
@@ -47,7 +57,7 @@ fn main() -> Result<()> {
         .into_par_iter()
         .map::<_, Result<(u32, Vec<_>)>>(|page_number| {
             log::info!("Processing page {}", page_number);
-            let url = Url::parse(&page_url(ENDPOINT_AO3, page_number))?;
+            let url = Url::parse(&page_url(ENDPOINT_AO3, page_number, &fandom, &author))?;
             let html = &client.get(url).send()?.text()?;
             let works = search_page_to_works(html)?;
 

@@ -148,8 +148,8 @@ pub fn search_page_to_works(body: &str) -> Result<Vec<Work>> {
 pub const ENDPOINT_AO3: &str = "https://archiveofourown.org";
 
 /// Get pages from the beginning of time onwards.
-pub fn page_url(endpoint: &str, number: u32) -> String {
-    format!("{}/works/search?commit=Search&page={}&utf8=✓&work_search[bookmarks_count]=&work_search[character_names]=&work_search[comments_count]=&work_search[complete]=&work_search[creators]=&work_search[crossover]=&work_search[fandom_names]=Avatar: The Last Airbender&work_search[freeform_names]=&work_search[hits]=&work_search[kudos_count]=&work_search[language_id]=&work_search[query]=&work_search[rating_ids]=&work_search[relationship_names]=&work_search[revised_at]=&work_search[single_chapter]=0&work_search[sort_column]=created_at&work_search[sort_direction]=asc&work_search[title]=&work_search[word_count]", endpoint, number)
+pub fn page_url(endpoint: &str, number: u32, fandom: &str, creators: &str) -> String {
+    format!("{}/works/search?commit=Search&page={}&utf8=✓&work_search[bookmarks_count]=&work_search[character_names]=&work_search[comments_count]=&work_search[complete]=&work_search[creators]={creators}&work_search[crossover]=&work_search[fandom_names]={fandom}&work_search[freeform_names]=&work_search[hits]=&work_search[kudos_count]=&work_search[language_id]=&work_search[query]=&work_search[rating_ids]=&work_search[relationship_names]=&work_search[revised_at]=&work_search[single_chapter]=0&work_search[sort_column]=created_at&work_search[sort_direction]=asc&work_search[title]=&work_search[word_count]", endpoint, number)
 }
 
 #[cfg(test)]

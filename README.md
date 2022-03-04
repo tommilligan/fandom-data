@@ -7,7 +7,7 @@ Analyse and visualise fandom data from AO3.
 Download the data to `jsonl` file (line delimited JSON objects), with the following command:
 
 ```bash
-cargo run --bin fetch -- --count 2000 --interval 10 -n 1 > output.jsonl
+cargo run --bin fetch -- --fandom "Avatar: The Last Airbender" --count 2000 --interval 10 -n 1 > output.jsonl
 ```
 
 Adding an interval between requests is recommended, to avoid hitting the Archive's rate limiting.
